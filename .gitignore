@@ -19,7 +19,7 @@ logs/
 *.pth
 *.spec
 
-data/*.csv
+# data/*.csv
 data/*.jpg
 data/*.png
 
