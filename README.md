@@ -19,3 +19,7 @@ For `venv` users:
 ```
 source env/bin/activate
 ```
+
+## Notes
+
+* Code uses tabs as spaces with 2 spaces = 1 tab. (Might screw up code when used with other editors not using this format)

@@ -33,6 +33,9 @@ class Autoencoder(nn.Module):
 
     self.errs = []
 
+    # Initialize model to device
+    self.to(self.device)
+
   def encode(self, x):
     for i in range(len(self.encoding_layers)):
       if self.h_activation == "relu":
@@ -77,22 +80,12 @@ class Autoencoder(nn.Module):
     self.load_state_dict(state['state_dict'])
     self.optimizer    = state['optimizer']
 
-  def diff(self, x):
-    x_hat = self.forward(x)
-
-    if self.error_type == "mse":
-      err = (x_hat - x).pow(2).sum(dim=1).sqrt()
-    else:
-      raise Exception("Invalid error_type: {}".format(self.error_type))
-
-    return err.detach().cpu().numpy()
-
   def fit(self, x, epochs=100, lr=0.005, batch_size=5):
     # Reset errors to empty list
     self.errs = []
 
     data        = AbstractDataset(x)
-    dataloader  = DataLoader(dataset=data, batch_size=batch_size, shuffle=True, num_workers=4)
+    dataloader  = DataLoader(dataset=data, batch_size=batch_size, shuffle=True, drop_last=False)
 
     if self.optimizer_type == "adam":
       self.optimizer = optim.Adam(self.parameters(), lr=lr)
