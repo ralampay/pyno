@@ -22,7 +22,7 @@ source env/bin/activate
 
 ## Sample Usage
 
-### Training and Saving a Model
+### Training and Saving an Autoencoder Model
 
 Train an autoencoder with 144 input size and 140 hidden neurons which will produce a model file called `model.pth` in the current directory. Defaults to using `cpu` for training. To use gpu, pass `--device cuda --gpu-index 0` as a command line argument (`--gpu-index` defaults to `0` when not specified).
 
