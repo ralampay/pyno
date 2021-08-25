@@ -125,4 +125,4 @@ class Autoencoder(nn.Module):
 
       print("Epoch: %i\tLoss: %0.5f" % (epoch + 1, curr_loss.item()))
 
-      self.errs.append(curr_loss.detach())
+      self.errs.append(curr_loss.item())

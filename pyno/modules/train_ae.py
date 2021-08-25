@@ -4,6 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
 import pandas as pd
+import plotext as plt
 from torch import tensor
 import torch
 
@@ -57,6 +58,14 @@ class TrainAe:
       lr=self.lr,
       batch_size=self.batch_size
     )
+
+    # Display the error in a plot
+    y = self.autoencoder.errs
+    plt.plot(range(1, self.epochs), y)
+    plt.title("Training Error per Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Error")
+    plt.show()
 
     print("Saving file to {}...".format(self.output_model_file))
 
