@@ -41,20 +41,13 @@ def main():
 
 
   if mode == "train-ae":
-    print("Training using device {}...".format(device))
-
-    if device == 'cuda':
-      print("CUDA Device: {}".format(torch.cuda.get_device_name(gpu_index)))
-
-      # Concatenate index of cuda machine specified
-      device = "cuda:{}".format(gpu_index)
-
     params = {
       'layers':             layers,
       'epochs':             epochs,
       'lr':                 lr,
       'batch_size':         batch_size,
       'device':             device,
+      'gpu_index':          gpu_index,
       'h_activation':       h_activation,
       'o_activation':       o_activation,
       'training_file':      training_file,
@@ -65,9 +58,6 @@ def main():
     cmd = TrainAe(params)
 
     cmd.execute()
-
-    print("Saved file to {}.".format(output_model_file))
-    print("Done.")
 
 if __name__ == '__main__':
   main()

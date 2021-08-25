@@ -17,6 +17,7 @@ class TrainAe:
     self.lr           = params.get('lr')
     self.batch_size   = params.get('batch_size')
     self.device       = params.get('device')
+    self.gpu_index    = params.get('gpu_index')
     self.h_activation = params.get('h_activation')
     self.o_activation = params.get('o_activation')
 
@@ -26,6 +27,14 @@ class TrainAe:
     self.output_model_file  = params.get('output_model_file')
 
   def execute(self):
+    print("Training using device {}...".format(self.device))
+
+    if self.device == 'cuda':
+      print("CUDA Device: {}".format(torch.cuda.get_device_name(self.gpu_index)))
+
+      # Concatenate index of cuda machine specified
+      self.device = "cuda:{}".format(self.gpu_index)
+
     self.autoencoder  = Autoencoder(
                           layers=self.layers, 
                           h_activation=self.h_activation,
@@ -49,4 +58,8 @@ class TrainAe:
       batch_size=self.batch_size
     )
 
+    print("Saving file to {}...".format(self.output_model_file))
+
     self.autoencoder.save(self.output_model_file)
+
+    print("Done.")
