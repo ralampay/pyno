@@ -65,6 +65,9 @@ class TrainAe:
     plt.title("Training Error per Epoch")
     plt.xlabel("Epoch")
     plt.ylabel("Error")
+    plt.axes_color("none")
+    plt.canvas_color("none")
+    plt.ticks_color("white")
     plt.show()
 
     print("Saving file to {}...".format(self.output_model_file))
