@@ -2,27 +2,60 @@ import sys
 import argparse
 import os
 
-import yaml
+sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
+
+from modules.train_ae import TrainAe
 
 def main():
   parser = argparse.ArgumentParser(description="PyNO: Neural network outlier detector")
 
-  parser.add_argument("--config", help="Config file to use (yaml)", type=str, required=True)
+  parser.add_argument("--mode", help="Mode to be used", choices=["train-ae"], type=str, required=True)
+  parser.add_argument("--training-file", help="CSV file for training autoencoder (classes should not be included)", type=str)
+  parser.add_argument("--output-model-file", help="Output file for model", type=str, default="model.pth")
+  parser.add_argument("--device", help="Device used for training/evaluation/prediction", choices=["cpu", "cuda:0"], type=str, default="cpu")
+  parser.add_argument("--layers", help='Layers for autoencoder', type=int, nargs='+')
+  parser.add_argument("--lr", help='Learning rate', type=float, default=0.001)
+  parser.add_argument("--epochs", help='Number of epochs', type=int, default=100)
+  parser.add_argument("--cont", help='Continue from model file', type=bool, default=False)
+  parser.add_argument("--h-activation", help='Hidden activation method', choices=["relu", "sigmoid"], type=str, default="relu")
+  parser.add_argument("--o-activation", help='Output activation method', choices=["relu", "sigmoid"], type=str, default="sigmoid")
+  parser.add_argument("--chunk-size", help='Chunk size for reading training data', type=int, default=100)
+  parser.add_argument("--batch-size", help='Batch size for training data', type=int, default=100)
 
-  args = parser.parse_args()
+  args              = parser.parse_args()
+  mode              = args.mode
+  device            = args.device
+  training_file     = args.training_file
+  output_model_file = args.output_model_file
+  layers            = args.layers
+  lr                = args.lr
+  epochs            = args.epochs
+  cont              = args.cont
+  h_activation      = args.h_activation
+  o_activation      = args.o_activation
+  chunk_size        = args.chunk_size
+  batch_size        = args.batch_size
 
-  config_file = args.config
+  if mode == "train-ae":
+    params = {
+      'layers':             layers,
+      'epochs':             epochs,
+      'lr':                 lr,
+      'batch_size':         batch_size,
+      'device':             device,
+      'h_activation':       h_activation,
+      'o_activation':       o_activation,
+      'training_file':      training_file,
+      'chunk_size':         chunk_size,
+      'output_model_file':  output_model_file
+    }
 
-  with open(config_file) as stream:
-    try:
-      config = yaml.safe_load(stream)
-    except yaml.YAMLError as e:
-      print("Error in parsing yaml file {}".format(config_file))
-      print(e)
-      sys.exit()
+    cmd = TrainAe(params)
 
-  print("Input size: {}".format(config.get('input_size')))
-  print("Done...")
+    print("Training...")
+    cmd.execute()
+
+    print("Saved file to {}".format(output_model_file))
 
 if __name__ == '__main__':
   main()

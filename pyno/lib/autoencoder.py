@@ -25,6 +25,8 @@ class Autoencoder(nn.Module):
     self.error_type     = error_type
     self.optimizer_type = optimizer_type
 
+    self.layers = layers
+
     reversed_layers = list(reversed(layers))
 
     for i in range(len(layers) - 1):
@@ -68,8 +70,14 @@ class Autoencoder(nn.Module):
 
   def save(self, filename):
     state = {
-      'state_dict':       self.state_dict(),
-      'optimizer':        self.optimizer.state_dict()
+      'params': {
+        'error_type':       self.error_type,
+        'o_activation':     self.o_activation,
+        'h_activation':     self.h_activation,
+        'layers':           self.layers,
+      },
+      'state_dict': self.state_dict(),
+      'optimizer':  self.optimizer.state_dict()
     }
 
     torch.save(state, filename)
