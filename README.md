@@ -22,7 +22,7 @@ source env/bin/activate
 
 ## Sample Usage
 
-1. Train an autoencoder with 144 input size and 140 hidden neurons which will produce a model file called `model.pth` in the current directory (defaults to using `cpu` for training. To use gpu, pass `--device cuda --gpu-index 0` as a command line argument (`--gpu-index` defaults to `0` when not specified).
+1. Train an autoencoder with 144 input size and 140 hidden neurons which will produce a model file called `model.pth` in the current directory. Defaults to using `cpu` for training. To use gpu, pass `--device cuda --gpu-index 0` as a command line argument (`--gpu-index` defaults to `0` when not specified).
 
 ```
 python -m pyno --mode train-ae --training-file data.csv --layers 144 140 --output-model-file model.pth
