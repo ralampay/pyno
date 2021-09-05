@@ -68,13 +68,16 @@ class Autoencoder(nn.Module):
 
     return x
 
-  def save(self, filename):
+  def save(self, filename, anomaly_threshold=None):
+
     state = {
       'params': {
-        'error_type':       self.error_type,
-        'o_activation':     self.o_activation,
-        'h_activation':     self.h_activation,
-        'layers':           self.layers,
+        'error_type':         self.error_type,
+        'o_activation':       self.o_activation,
+        'h_activation':       self.h_activation,
+        'layers':             self.layers,
+        'device':             self.device,
+        'anomaly_threshold':  anomaly_threshold
       },
       'state_dict': self.state_dict(),
       'optimizer':  self.optimizer.state_dict()

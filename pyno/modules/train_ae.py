@@ -9,6 +9,7 @@ from torch import tensor
 import torch
 
 from lib.autoencoder import Autoencoder
+from lib.auto_threshold_re import AutoThresholdRe
 
 class TrainAe:
   def __init__(self, params=None):
@@ -26,6 +27,8 @@ class TrainAe:
     self.training_file      = params.get('training_file')
     self.chunk_size         = params.get('chunk_size')
     self.output_model_file  = params.get('output_model_file')
+
+    self.with_autothresholding  = params.get('with_autothresholding')
 
   def execute(self):
     print("Training using device {}...".format(self.device))
@@ -70,8 +73,16 @@ class TrainAe:
     plt.ticks_color("white")
     plt.show()
 
+    if self.with_autothresholding:
+      autothreshold_ops = AutoThresholdRe(X, self.autoencoder)
+      autothreshold_ops.execute()
+
+      anomaly_threshold = autothreshold_ops.optimal_threshold
+    else:
+      anomaly_threshold = None
+
     print("Saving file to {}...".format(self.output_model_file))
 
-    self.autoencoder.save(self.output_model_file)
+    self.autoencoder.save(self.output_model_file, anomaly_threshold=anomaly_threshold)
 
     print("Done.")

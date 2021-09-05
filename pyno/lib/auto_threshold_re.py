@@ -5,9 +5,10 @@ from scipy.stats import iqr
 
 class AutoThresholdRe():
   def __init__(self, x, autoencoder, error_type="mse"):
-    self.autoencoder  = autoencoder
-    self.error_type   = error_type
-    self.x            = x
+    self.autoencoder        = autoencoder
+    self.error_type         = error_type
+    self.x                  = x
+    self.optimal_threshold  = -1
 
   def execute(self):
     self.set_optimal_threshold()
@@ -63,7 +64,7 @@ class AutoThresholdRe():
         - mse (mean squared errors)
     """
 
-    _x = self.x if x == None else x
+    _x = (self.x if x == None else x).to(self.autoencoder.device)
 
     if x == None:
       x_hat = self.autoencoder.forward(_x)
