@@ -26,6 +26,7 @@ class Autoencoder(nn.Module):
     self.optimizer_type = optimizer_type
 
     self.layers = layers
+    self.reconstruction_threshold = -1
 
     reversed_layers = list(reversed(layers))
 
@@ -107,6 +108,7 @@ class Autoencoder(nn.Module):
 
     for epoch in range(epochs):
       curr_loss = 0
+      self.reconstruction_threshold = -1
 
       for i, (inputs, labels) in enumerate(dataloader):
         inputs, labels = inputs.to(self.device), labels.to(self.device)
@@ -118,6 +120,10 @@ class Autoencoder(nn.Module):
           loss = (output - labels).pow(2).sum(dim=1).sqrt().mean()
 
           curr_loss += loss
+
+          if loss > self.reconstruction_threshold:
+            self.reconstruction_threshold = loss
+
           loss.backward()
 
           self.optimizer.step()

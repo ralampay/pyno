@@ -27,6 +27,7 @@ class TrainAe:
     self.training_file      = params.get('training_file')
     self.chunk_size         = params.get('chunk_size')
     self.output_model_file  = params.get('output_model_file')
+    self.train_unsupervised = params.get('train_unsupervised')
 
     self.with_autothresholding  = params.get('with_autothresholding')
 
@@ -38,6 +39,9 @@ class TrainAe:
 
       # Concatenate index of cuda machine specified
       self.device = "cuda:{}".format(self.gpu_index)
+
+    if self.train_unsupervised:
+      print("Training in unsupervised manner...")
 
     self.autoencoder  = Autoencoder(
                           layers=self.layers, 
@@ -53,7 +57,7 @@ class TrainAe:
       data = data.append(chunk)
 
     # Represent data as a tensor for training
-    X = torch.tensor(data.values).float()
+    X = torch.tensor(data.values).float().to(self.device)
 
     self.autoencoder.fit(
       X,
@@ -74,10 +78,63 @@ class TrainAe:
     plt.show()
 
     if self.with_autothresholding:
-      autothreshold_ops = AutoThresholdRe(X, self.autoencoder)
-      autothreshold_ops.execute()
+      if self.train_unsupervised:
+        x_hat = self.autoencoder.forward(X)
+        
+        if self.autoencoder.error_type == "mse":
+          err = (x_hat - X).pow(2).sum(dim=1).sqrt()
+        else:
+          raise Exception("Invalid error_type: {}".format(autoencoder.error_type))
 
-      anomaly_threshold = autothreshold_ops.optimal_threshold
+        err_vals = err.detach().cpu().numpy()
+
+        new_data = []
+
+        print("Reconstruction Threshold: {}".format(self.autoencoder.reconstruction_threshold))
+
+        for idx, err_elem in enumerate(err_vals):
+          if err_elem < self.autoencoder.reconstruction_threshold:
+            new_data.append(data.values[idx])
+
+        new_X = torch.tensor(new_data).float().to(self.device)
+
+        print("Original dataset length: {}".format(len(X)))
+        print("Derived dataset length: {}".format(len(new_X)))
+ 
+        self.autoencoder  = Autoencoder(
+                              layers=self.layers, 
+                              h_activation=self.h_activation,
+                              o_activation=self.o_activation,
+                              device=self.device
+                            )
+
+        self.autoencoder.fit(
+          new_X,
+          epochs=self.epochs,
+          lr=self.lr,
+          batch_size=self.batch_size
+        )
+
+        # Display the error in a plot
+        y = self.autoencoder.errs
+        plt.plot(range(1, self.epochs), y)
+        plt.title("Training Error per Epoch")
+        plt.xlabel("Epoch")
+        plt.ylabel("Error")
+        plt.axes_color("none")
+        plt.canvas_color("none")
+        plt.ticks_color("white")
+        plt.show()
+
+        autothreshold_ops = AutoThresholdRe(new_X, self.autoencoder)
+        autothreshold_ops.execute()
+
+        anomaly_threshold = autothreshold_ops.optimal_threshold
+      else:
+        autothreshold_ops = AutoThresholdRe(X, self.autoencoder)
+        autothreshold_ops.execute()
+
+        anomaly_threshold = autothreshold_ops.optimal_threshold
     else:
       anomaly_threshold = None
 

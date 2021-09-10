@@ -27,6 +27,7 @@ def main():
   parser.add_argument("--chunk-size", help='Chunk size for reading training data', type=int, default=100)
   parser.add_argument("--batch-size", help='Batch size for training data', type=int, default=100)
   parser.add_argument("--with-autothresholding", help='Save an autothreshold value for AE training', type=bool, default=True)
+  parser.add_argument("--train-unsupervised", help='Train in an unsupervised manner', type=bool, default=False)
 
   args                  = parser.parse_args()
   mode                  = args.mode
@@ -45,6 +46,7 @@ def main():
   chunk_size            = args.chunk_size
   batch_size            = args.batch_size
   with_autothresholding = args.with_autothresholding
+  train_unsupervised    = args.train_unsupervised
 
 
   if mode == "train-ae":
@@ -60,7 +62,8 @@ def main():
       'training_file':          training_file,
       'chunk_size':             chunk_size,
       'output_model_file':      output_model_file,
-      'with_autothresholding':  with_autothresholding
+      'with_autothresholding':  with_autothresholding,
+      'train_unsupervised':     train_unsupervised
     }
 
     cmd = TrainAe(params)
@@ -73,7 +76,8 @@ def main():
 
     params = {
       'model_file':   model_file,
-      'test_file':    test_file
+      'test_file':    test_file,
+      'chunk_size':   chunk_size
     }
 
     cmd = EvalAe(params)

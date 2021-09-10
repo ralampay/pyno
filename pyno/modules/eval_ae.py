@@ -8,6 +8,7 @@ import plotext as plt
 from torch import tensor
 import torch
 from sklearn.metrics import confusion_matrix
+from tabulate import tabulate
 
 from lib.autoencoder import Autoencoder
 from lib.utils import performance_metrics
@@ -65,3 +66,29 @@ class EvalAe:
 
     self.predictions  = np.array([-1 if elem else 1 for elem in bool_array])
     self.metrics      = performance_metrics(self.labels, self.predictions)
+
+    print("Test File: {}".format(self.test_file))
+    print("Model File: {}".format(self.model_file))
+    print(
+      tabulate(
+        [
+          ["True Positive", self.metrics['tp']],
+          ["True Negative", self.metrics['tn']],
+          ["False Positive", self.metrics['fp']],
+          ["False Negative", self.metrics['fn']],
+          ["True Positive Rate", "{}%".format(round(self.metrics['tpr'] * 100, 2))],
+          ["True Negative Rate", "{}%".format(round(self.metrics['tnr'] * 100, 2))],
+          ["False Positive Rate", "{}%".format(round(self.metrics['fpr'] * 100, 2))],
+          ["False Negative Rate", "{}%".format(round(self.metrics['fnr'] * 100, 2))],
+          ["PPV", "{}%".format(round(self.metrics['ppv'] * 100, 2))],
+          ["NPV", "{}%".format(round(self.metrics['npv'] * 100, 2))],
+          ["TS", "{}%".format(round(self.metrics['ts'] * 100, 2))],
+          ["PT", "{}%".format(round(self.metrics['pt'] * 100, 2))],
+          ["Accuracy", "{}%".format(round(self.metrics['acc'] * 100, 2))],
+          ["F1", "{}%".format(round(self.metrics['f1'] * 100, 2))],
+          ["MCC", round(self.metrics['mcc'], 2)]
+        ],
+        headers=["Metric", "Value"],
+        tablefmt="fancy_grid"
+      )
+    )
