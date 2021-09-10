@@ -39,3 +39,4 @@ python -m pyno --mode train-ae --training-file data.csv --layers 144 140 --outpu
 ## Notes
 
 * Code uses tabs as spaces with 2 spaces = 1 tab. (Might screw up code when used with other editors not using this format)
+* When committing, make sure to clear all output from notebooks via `jupyter nbconvert --clear-output --inplace notebooks/*.ipynb` command
