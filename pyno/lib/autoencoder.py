@@ -118,17 +118,17 @@ class Autoencoder(nn.Module):
 
         if self.error_type == "mse":
           loss = (output - labels).pow(2).sum(dim=1).sqrt().mean()
-
-          curr_loss += loss
-
-          if loss > self.reconstruction_threshold:
-            self.reconstruction_threshold = loss
-
-          loss.backward()
-
-          self.optimizer.step()
         else:
           raise Exception("Invalid error_type: {}".format(self.error_type))
+
+        curr_loss += loss
+
+        if loss > self.reconstruction_threshold:
+          self.reconstruction_threshold = loss
+
+        loss.backward()
+
+        self.optimizer.step()
 
       curr_loss = curr_loss / num_iterations
 
