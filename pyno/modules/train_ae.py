@@ -80,6 +80,11 @@ class TrainAe:
 
         if self.with_autothresholding:
             if self.train_unsupervised:
+                # Use AutoThresholdRe to determine first threshold value
+                autothreshold_ops = AutoThresholdRe(X, self.autoencoder)
+                autothreshold_ops.execute()
+                self.autoencoder.reconstruction_threshold = autothreshold_ops.optimal_threshold
+
                 x_hat = self.autoencoder.forward(X)
 
                 if self.autoencoder.error_type == "mse":
