@@ -57,6 +57,7 @@ class TrainAe:
             data = data.append(chunk)
 
         # Represent data as a tensor for training
+        print("Storing data to tensor...")
         X = torch.tensor(data.values).float().to(self.device)
 
         self.autoencoder.fit(
@@ -92,10 +93,12 @@ class TrainAe:
 
                 print("Reconstruction Threshold: {}".format(self.autoencoder.reconstruction_threshold))
 
+                data_values = data.values
                 for idx, err_elem in enumerate(err_vals):
                     if err_elem < self.autoencoder.reconstruction_threshold:
-                        new_data.append(data.values[idx])
+                        new_data.append(data_values[idx])
 
+                print("Allocating new data for training...")
                 new_X = torch.tensor(new_data).float().to(self.device)
 
                 print("Original dataset length: {}".format(len(X)))

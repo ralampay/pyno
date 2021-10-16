@@ -44,6 +44,31 @@ class AutoThresholdRe():
 
         return np.array([-1 if elem else 1 for elem in bool_arr])
 
+    def predict_proba(self, x):
+        if not self.optimal_threshold:
+            raise Exception("No optimal threshold set")
+
+        re = self.diff(x)
+
+        result = []
+
+        for e in re:
+            if e >= self.optimal_threshold:
+                prob = 0.5 + (1 - (self.optimal_threshold / e))
+                
+                if prob >= 1:
+                    prob = 0.99
+
+                result.append([prob, 1 - prob])
+            else:
+                prob = 0.5 + (1 - (e / self.optimal_threshold))
+
+                if prob >= 1:
+                    prob = 0.99
+                result.append([1 - prob, prob])
+
+        return np.array(result)
+
     def diff(self, x):
         x_hat = self.autoencoder.forward(x)
 

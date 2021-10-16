@@ -36,7 +36,13 @@ Train an autoencoder with 144 input size and 140 hidden neurons which will produ
 python -m pyno --mode train-ae --training-file data.csv --layers 144 140 --output-model-file model.pth
 ```
 
-## Notes
+### Using the Data Parser Utility
 
+`data-parser` is a utility that will split an initial dataset
+
+python -m data-parser --input-file https://happy-research.s3.ap-southeast-1.amazonaws.com/kddcup99.csv --training-file data/kddcup99-unsupervised-training.csv --validation-file data/kddcup99-unsupervised-validation.csv --outlier-ratio 0.1
+
+## Notes
+* A dataset used by `data-parser` is assumed to be normalized, no headers and will have labels at the last column where `1` represents normal / benign points and `-1` represents outliers.
 * Code uses tabs as spaces with 2 spaces = 1 tab. (Might screw up code when used with other editors not using this format)
-* When committing, make sure to clear all output from notebooks via `jupyter nbconvert --clear-output --inplace notebooks/*.ipynb` command
+* When committing, make sure to clear all output from notebooks via `jupyter nbconvert --clear-output --inplace notebooks/**/*.ipynb` command

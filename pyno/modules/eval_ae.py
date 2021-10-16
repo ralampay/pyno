@@ -9,6 +9,7 @@ from torch import tensor
 import torch
 from sklearn.metrics import confusion_matrix
 from tabulate import tabulate
+import math
 
 from lib.autoencoder import Autoencoder
 from lib.utils import performance_metrics
@@ -66,6 +67,17 @@ class EvalAe:
 
         self.predictions  = np.array([-1 if elem else 1 for elem in bool_array])
         self.metrics      = performance_metrics(self.labels, self.predictions)
+
+        # Predict probabilities
+        self.probabilities = []
+
+        for e in err_values:
+            prob = 1 / (1 + math.exp(-(e - self.anomaly_threshold)**2))
+
+            if e <= self.anomaly_threshold:
+                self.probabilities.append(prob)
+            else:
+                self.probabilities.append(1 - prob)
 
         print("Test File: {}".format(self.test_file))
         print("Model File: {}".format(self.model_file))
