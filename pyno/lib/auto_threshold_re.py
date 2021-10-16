@@ -10,8 +10,6 @@ class AutoThresholdRe():
         self.x                  = x
         self.optimal_threshold  = -1
 
-        self.autoencoder.to("cpu")
-
     def execute(self):
         self.set_optimal_threshold()
 
@@ -91,10 +89,7 @@ class AutoThresholdRe():
             - mse (mean squared errors)
         """
 
-        # Always use CPU for error computation
-
-        #_x = (self.x if x == None else x).to(self.autoencoder.device)
-        _x = self.x if x == None else x
+        _x = (self.x if x == None else x).to(self.autoencoder.device)
 
         x_hat = self.autoencoder.forward(_x)
 
