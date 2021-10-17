@@ -7,11 +7,12 @@ import pandas as pd
 import plotext as plt
 from torch import tensor
 import torch
+import hdbscan
 
 from lib.autoencoder import Autoencoder
 from lib.auto_threshold_re import AutoThresholdRe
 
-class TrainAe:
+class TrainFilteredAe:
     def __init__(self, params=None):
         # Autoencoder parameters
         self.layers       = params.get('layers')
@@ -52,9 +53,49 @@ class TrainAe:
         for i, chunk in enumerate(pd.read_csv(self.training_file, header=None, chunksize=self.chunk_size)):
             data = data.append(chunk)
 
+        # Get number of dimensions
+        input_dim = len(data.columns)
+
         # Represent data as a tensor for training
         print("Storing data to tensor...")
         X = torch.tensor(data.values).float().to(self.device)
+
+        self.autoencoder.fit(
+            X,
+            epochs=self.epochs,
+            lr=self.lr,
+            batch_size=self.batch_size
+        )
+
+        # Extract latent variables
+        compressed_data = self.autoencoder.encode(X).cpu().detach().numpy()
+
+        # Custer with dbscan
+        print("Clustering with DBSCAN...")
+        clustering = hdbscan.HDBSCAN().fit(compressed_data)
+        compressed_labels = clustering.labels_
+
+        filtered_data = pd.DataFrame()
+
+        data_values = data.values
+
+        print("Filtering out normal data...")
+        for i in range(len(compressed_labels)):
+            if compressed_labels[i] != -1:
+                filtered_data = filtered_data.append([data_values[i]])
+
+        print("Reduced data from {} to {}...".format(len(data), len(filtered_data)))
+
+        self.autoencoder =  Autoencoder(
+                                layers=self.layers, 
+                                h_activation=self.h_activation,
+                                o_activation=self.o_activation,
+                                device=self.device
+                            )
+
+        print("Storing data to tensor...")
+        filtered_data_values = filtered_data.values
+        X = torch.tensor(filtered_data_values).float().to(self.device)
 
         self.autoencoder.fit(
             X,
