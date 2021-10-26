@@ -11,6 +11,7 @@ import hdbscan
 
 from lib.autoencoder import Autoencoder
 from lib.auto_threshold_re import AutoThresholdRe
+from lib.utils import get_gpu_free_memory
 
 class TrainNeuralFilteredAe:
     def __init__(self, params=None):
@@ -78,6 +79,21 @@ class TrainNeuralFilteredAe:
         err_values = err.detach().cpu().numpy()
         bool_array = err_values >= self.autoencoder.reconstruction_threshold.detach().cpu().numpy()
 
+        # Clear GPU Memory
+        self.autoencoder.destroy()
+        del self.autoencoder
+
+        if self.device != "cpu":
+            free_memory = get_gpu_free_memory(self.gpu_index)
+
+            print("Current free GPU memory: {} KB".format(free_memory * 0.001))
+            print("Clearing CUDA cache...")
+
+            torch.cuda.empty_cache()
+
+            free_memory = get_gpu_free_memory(self.gpu_index)
+            print("Free memory after clearing: {} KB".format(free_memory * 0.001))
+
         predictions  = np.array([-1 if elem else 1 for elem in bool_array])
 
         data_values = data.values
@@ -119,6 +135,18 @@ class TrainNeuralFilteredAe:
         plt.canvas_color("none")
         plt.ticks_color("white")
         plt.show()
+
+        # Free up memory again
+        if self.device != "cpu":
+            free_memory = get_gpu_free_memory(self.gpu_index)
+
+            print("Current free GPU memory: {} KB".format(free_memory * 0.001))
+            print("Clearing CUDA cache...")
+
+            torch.cuda.empty_cache()
+
+            free_memory = get_gpu_free_memory(self.gpu_index)
+            print("Free memory after clearing: {} KB".format(free_memory * 0.001))
 
         if self.with_autothresholding:
             autothreshold_ops = AutoThresholdRe(X, self.autoencoder)

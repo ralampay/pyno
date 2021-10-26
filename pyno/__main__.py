@@ -8,8 +8,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from modules.train_ae import TrainAe
 from modules.train_filtered_ae import TrainFilteredAe
 from modules.train_neural_filtered_ae import TrainNeuralFilteredAe
+from modules.train_cnn_ae import TrainCnnAe
 from modules.eval_ae import EvalAe
 from modules.compress import Compress
+from modules.compress_cnn import CompressCnn
 
 def main():
     mode_choices = [
@@ -18,7 +20,8 @@ def main():
         "train-neural-filtered-ae",
         "train-cnn-ae",
         "eval-ae",
-        "compress"
+        "compress",
+        "compress-cnn"
     ]
 
     parser = argparse.ArgumentParser(description="PyNO: Neural network outlier detector")
@@ -31,6 +34,7 @@ def main():
     parser.add_argument("--input-file", help="Input file for mode compress", type=str, required=False)
     parser.add_argument("--output-file", help="Output file for mode compress", type=str, default="output.csv")
     parser.add_argument("--compress-with-labels", help="Compress data and include labels from file (assumed to be last column)", type=bool, default=True)
+    parser.add_argument("--compress-with-errors", help='Include residual errors with AE compress', type=bool, default=False)
     parser.add_argument("--device", help="Device used for training/evaluation/prediction", choices=["cpu", "cuda"], type=str, default="cpu")
     parser.add_argument("--gpu-index", help="GPU index", type=int, default=0)
     parser.add_argument("--layers", help='Layers for autoencoder', type=int, nargs='+')
@@ -49,6 +53,7 @@ def main():
     parser.add_argument("--kernel-size", help='Kernel size for CNN', type=int, default=3)
     parser.add_argument("--num-channels", help='Number of channels for CNN', type=int, default=3)
     parser.add_argument("--input-img-dir", help='Input image directory for CNN', type=str)
+    parser.add_argument("--padding", help='Padding value for CNN', type=int, default=1)
 
     args                  = parser.parse_args()
     mode                  = args.mode
@@ -75,6 +80,10 @@ def main():
     num_channels          = args.num_channels
     input_img_dir         = args.input_img_dir
     compress_with_labels  = args.compress_with_labels
+    compress_with_errors  = args.compress_with_errors
+    padding               = args.padding
+    img_width             = args.img_width
+    img_height            = args.img_height
 
 
     if mode == "train-ae":
@@ -150,11 +159,29 @@ def main():
             'output_file':          output_file,
             'input_file':           input_file,
             'compress_with_labels': compress_with_labels,
+            'compress_with_errors': compress_with_errors,
             'device':               device,
             'gpu_index':            gpu_index
         }
 
         cmd = Compress(params)
+
+        cmd.execute()
+
+    elif mode == "compress-cnn":
+        if not model_file:
+            raise ValueError('model_file required for mode compress-cnn')
+
+        if not output_file:
+            raise ValueError('output_file required for mode compress-cnn')
+
+        params = {
+            'model_file':       model_file,
+            'input_img_dir':    input_img_dir,
+            'output_file':      output_file
+        }
+
+        cmd = CompressCnn(params)
 
         cmd.execute()
 
@@ -172,15 +199,20 @@ def main():
             'img_height':             img_height,
             'h_activation':           h_activation,
             'o_activation':           o_activation,
-            'chunk_size':             chunk_size,
             'input_img_dir':          input_img_dir,
             'output_model_file':      output_model_file,
             'epochs':                 epochs,
             'lr':                     lr,
             'batch_size':             batch_size,
             'device':                 device,
-            'gpu_index':              gpu_index
+            'gpu_index':              gpu_index,
+            'cont':                   cont,
+            'model_file':             model_file
         }
+
+        cmd = TrainCnnAe(params=params)
+
+        cmd.execute()
 
     elif mode == "eval-ae":
         if not model_file or not test_file:

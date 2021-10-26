@@ -17,6 +17,7 @@ class Compress:
         self.input_file             = params.get('input_file')
         self.output_file            = params.get('output_file')
         self.compress_with_labels   = params.get('compress_with_labels')
+        self.compress_with_errors   = params.get('compress_with_errors')
         self.device                 = params.get('device')
         self.gpu_index              = params.get('gpu_index')
 
@@ -83,6 +84,21 @@ class Compress:
         for r in result:
             data_to_csv = data_to_csv.append([r])
 
+        """
+        Add error term if compress_with_errors is activated
+        """
+        if self.compress_with_errors:
+            self.X_hat = self.autoencoder.forward(self.X)
+
+            if self.autoencoder.error_type == "mse":
+                err = (self.X_hat - self.X).pow(2).sum(dim=1).sqrt()
+            else:
+                raise Exception("Invalid error_type: {}".format(self.autoencoder.error_type))
+            err_values = err.detach().cpu().numpy()
+
+        """
+        Include labels
+        """
         if self.compress_with_labels:
             data_to_csv['label'] = self.labels
 

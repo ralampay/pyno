@@ -39,6 +39,11 @@ class Autoencoder(nn.Module):
         # Initialize model to device
         self.to(self.device)
 
+    def destroy(self):
+        del self.encoding_layers
+        del self.decoding_layers
+        del self.errs
+
     def encode(self, x):
         for i in range(len(self.encoding_layers)):
             if self.h_activation == "relu":
