@@ -10,6 +10,7 @@ from modules.train_filtered_ae import TrainFilteredAe
 from modules.train_neural_filtered_ae import TrainNeuralFilteredAe
 from modules.train_cnn_ae import TrainCnnAe
 from modules.eval_ae import EvalAe
+from modules.predict_ae import PredictAe
 from modules.compress import Compress
 from modules.compress_cnn import CompressCnn
 
@@ -21,7 +22,8 @@ def main():
         "train-cnn-ae",
         "eval-ae",
         "compress",
-        "compress-cnn"
+        "compress-cnn",
+        "predict-ae"
     ]
 
     parser = argparse.ArgumentParser(description="PyNO: Neural network outlier detector")
@@ -225,6 +227,20 @@ def main():
         }
 
         cmd = EvalAe(params)
+
+        cmd.execute()
+
+    elif mode == "predict-ae":
+        if not model_file or not test_file:
+            raise ValueError('model_file and test_file required for mode predict-ae')
+
+        params = {
+            'model_file':   model_file,
+            'test_file':    test_file,
+            'chunk_size':   chunk_size
+        }
+
+        cmd = PredictAe(params)
 
         cmd.execute()
   

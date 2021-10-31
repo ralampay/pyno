@@ -77,6 +77,8 @@ class TrainCnnAe:
             batch_size=self.batch_size
         )
 
+        print("Latent Dimensionality: {}".format(self.autoencoder.latent_dim))
+
         print("Saving file to {}...".format(self.output_model_file))
 
         self.autoencoder.save(self.output_model_file)

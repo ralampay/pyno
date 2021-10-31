@@ -76,6 +76,9 @@ class CnnAutoencoder(nn.Module):
 
             x = self.pool(x)
 
+        # Set the latent_dim
+        self.latent_dim = len(x.view(x.size(0), -1)[0])
+
         return x
 
     def deconv(self, x):
