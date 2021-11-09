@@ -9,6 +9,7 @@ from modules.train_ae import TrainAe
 from modules.train_filtered_ae import TrainFilteredAe
 from modules.train_neural_filtered_ae import TrainNeuralFilteredAe
 from modules.train_cnn_ae import TrainCnnAe
+from modules.train_masked_cnn_ae import TrainMaskedCnnAe
 from modules.eval_ae import EvalAe
 from modules.predict_ae import PredictAe
 from modules.compress import Compress
@@ -20,6 +21,7 @@ def main():
         "train-filtered-ae",
         "train-neural-filtered-ae",
         "train-cnn-ae",
+        "train-masked-cnn-ae",
         "eval-ae",
         "compress",
         "compress-cnn",
@@ -55,6 +57,7 @@ def main():
     parser.add_argument("--kernel-size", help='Kernel size for CNN', type=int, default=3)
     parser.add_argument("--num-channels", help='Number of channels for CNN', type=int, default=3)
     parser.add_argument("--input-img-dir", help='Input image directory for CNN', type=str)
+    parser.add_argument("--masked-img-dir", help='Masked image directory for CNN', type=str)
     parser.add_argument("--padding", help='Padding value for CNN', type=int, default=1)
 
     args                  = parser.parse_args()
@@ -81,6 +84,7 @@ def main():
     kernel_size           = args.kernel_size
     num_channels          = args.num_channels
     input_img_dir         = args.input_img_dir
+    masked_img_dir        = args.masked_img_dir
     compress_with_labels  = args.compress_with_labels
     compress_with_errors  = args.compress_with_errors
     padding               = args.padding
@@ -213,6 +217,39 @@ def main():
         }
 
         cmd = TrainCnnAe(params=params)
+
+        cmd.execute()
+
+    elif mode == "train-masked-cnn-ae":
+        if not input_img_dir:
+            raise ValueError("input-img-dir required for Masked CNN AE Training")
+
+        if not masked_img_dir:
+            raise ValueError("masked-img-dir required for Masked CNN AE Training")
+
+        params = {
+            'scale':                  scale,
+            'channel_maps':           channel_maps,
+            'padding':                padding,
+            'kernel_size':            kernel_size,
+            'num_channels':           num_channels,
+            'img_width':              img_width,
+            'img_height':             img_height,
+            'h_activation':           h_activation,
+            'o_activation':           o_activation,
+            'input_img_dir':          input_img_dir,
+            'masked_img_dir':         masked_img_dir,
+            'output_model_file':      output_model_file,
+            'epochs':                 epochs,
+            'lr':                     lr,
+            'batch_size':             batch_size,
+            'device':                 device,
+            'gpu_index':              gpu_index,
+            'cont':                   cont,
+            'model_file':             model_file
+        }
+
+        cmd = TrainMaskedCnnAe(params=params)
 
         cmd.execute()
 

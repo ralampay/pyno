@@ -10,6 +10,7 @@ import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from abstract_dataset import AbstractDataset
+from paired_abstract_dataset import PairedAbstractDataset
 
 class CnnAutoencoder(nn.Module):
     def __init__(self, scale=2, channel_maps=[], padding=1, kernel_size=3, num_channels=3, img_width=500, img_height=500, device=torch.device("cpu"), criterion=nn.BCELoss(), h_activation="relu", o_activation="sigmoid"):
@@ -165,11 +166,15 @@ class CnnAutoencoder(nn.Module):
         self.img_width      = params['img_width']
         self.img_height     = params['img_height']
 
-    def fit(self, x, epochs=100, lr=0.001, batch_size=5, optimizer_type="adam"):
+    def fit(self, x, epochs=100, lr=0.001, batch_size=5, optimizer_type="adam", y=None):
         # Reset errors to empty list
         self.errs = []
 
-        data        = AbstractDataset(x)
+        if y == None:
+            data = AbstractDataset(x)
+        else:
+            data = PairedAbstractDataset(x, y)
+
         dataloader  = DataLoader(dataset=data, batch_size=batch_size, shuffle=True, drop_last=False)
 
         if optimizer_type == "adam":
